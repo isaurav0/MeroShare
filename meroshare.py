@@ -4,11 +4,11 @@ from nature import Dotenv
 
 class MeroShare:
 
-    def __init__(self):
-        self.auth_url = 'https://backend.cdsc.com.np/api/meroShare/auth/'
-        self.issue_url = 'https://backend.cdsc.com.np/api/meroShare/'\
+    def __init__(self, defaultLogin=True):
+        self.__auth_url__ = 'https://backend.cdsc.com.np/api/meroShare/auth/'
+        self.__issue_url__ = 'https://backend.cdsc.com.np/api/meroShare/'\
                          'companyShare/active/search/'
-        self.headers = {
+        self.__headers__ = {
             'Accept': 'application/json, text/plain, */*',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Language': 'en-US,en;q=0.9',
@@ -24,17 +24,19 @@ class MeroShare:
                           ' OS X 10_15_6) AppleWebKit/537.36 (KHTML'
                           ', like Gecko) Chrome/85.0.4183.83 Safari/537.36'
         }
-        self.dotenv = Dotenv()
-        self.loginUser()
+        self.issues = None
+        self.__env__ = Dotenv()
+        if defaultLogin:
+            self.loginUser()
 
-    def getAuthHeaders(self):
+    def __getAuthHeaders__(self):
         auth_headers = {
-            'Authorization': self.dotenv.get('AUTH'),
+            'Authorization': self.__env__.get('AUTH'),
             'Content-Length': '446',
         }
-        return {**self.headers, **auth_headers}
+        return {**self.__headers__, **auth_headers}
 
-    def consoleInput(self):
+    def __consoleInput__(self):
         try:
             username = int(input('Enter username: '))
             password = getpass()
@@ -43,39 +45,40 @@ class MeroShare:
         except Exception:
             traceback.printexc()
 
-    def getCredentials(self):
-        credentials = self.dotenv.get('USERNAME', 'PASSWORD', 'CID')
+    def __getCredentials__(self):
+        credentials = self.__env__.get('USERNAME', 'PASSWORD', 'CID')
         if None in credentials:
             self.eraseCredentials()
-            credentials = self.consoleInput()
-        return credentials
+            credentials = self.__consoleInput__()
+        return credentials    
 
-    def eraseCredentials(self):
-        self.dotenv.removeAll()
-
-    def loginRequest(self, username, password, cid):
+    def __loginRequest__(self, username, password, cid):
         payload = json.dumps({
             "clientId": cid,
             "username": username,
             "password": password
         })
-        res = requests.post(self.auth_url, headers=self.headers, data=payload)
+        res = requests.post(self.__auth_url__, headers=self.__headers__, data=payload)
         self.eraseCredentials()
         if res.status_code == 200:
             print('Login successful')
-            self.dotenv.set('USERNAME', username)
-            self.dotenv.set('PASSWORD', password)
-            self.dotenv.set('CID', cid)
-            self.dotenv.set('AUTH', res.headers['Authorization'])
+            self.__env__.set('USERNAME', username)
+            self.__env__.set('PASSWORD', password)
+            self.__env__.set('CID', cid)
+            self.__env__.set('AUTH', res.headers['Authorization'])
             return res.headers['Authorization']
         return None
 
-    def loginUser(self):
-        self.auth = self.dotenv.get('AUTH')
-        if not self.auth:
-            username, password, cid = self.getCredentials()
-            self.auth = self.loginRequest(username, password, cid)
+    def eraseCredentials(self):
+        self.__env__.removeAll()
+        self.issues = None
+        return self
 
+    def loginUser(self):
+        self.auth = self.__env__.get('AUTH')
+        if not self.auth:
+            username, password, cid = self.__getCredentials__()
+            self.auth = self.__loginRequest__(username, password, cid)
 
     def getCurrentIssues(self):
         payload = {"filterFieldParams": [
@@ -92,16 +95,17 @@ class MeroShare:
                     ]
                    }
         res = requests.post(
-            self.issue_url,
-            headers=self.getAuthHeaders(),
+            self.__issue_url__,
+            headers=self.__getAuthHeaders__(),
             data=json.dumps(payload)
         )
         if res.status_code == 200:
-            return res.text
-        else:
-            self.dotenv.remove('AUTH')
-            print('Please login again.')
-            return json.loads(res.text)['message']
+            self.issues = json.loads(res.text)
+            return self
+        self.__env__.remove('AUTH')
+        print(json.loads(res.text)['message'])
+        print('Please start again.')
+        return self
 
-    def print_json(self, keys):
+    def printIssues(self, keys):
         pass

@@ -63,16 +63,25 @@ class Dotenv:
 		with open(self.file, 'r') as fp:
 			all_lines = fp.readlines()
 
-		with open(self.file, 'w') as fp:
-			for line in all_lines:				
-					if '=' in line:
-						for key in keys:
-							if self.line_key(line)==key:
-								pass
-							else:
-								fp.writelines(line)
+		with open(self.file, 'w+') as fp:
+			for line in all_lines:					
+				if not self.line_key(line) in keys:
+					fp.writelines(line)
 
 	def removeAll(self):
-		with open(self.file, 'w+') as fp:
-			fp.close()
+		open(self.file, 'w+').close()
+
+
+env = Dotenv()
+env.set('NAME', 'SAURAV')
+env.set('ROLL', '1')
+env.set('CLASS', '10')
+env.set('CLASS', '10')
+env.set('CLASS', '20')
+
+env.remove('ROLL', 'CLASS')
+# env.remove('CLASS')
+# env.remove('NAME')
+
+
 
