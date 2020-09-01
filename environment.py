@@ -1,74 +1,66 @@
 import os
 
-config = {}
-
-def check_string(func):
-	def convert(self, *args):
-		return func(self, tuple([str(arg) for arg in args]))
-	return convert
 
 class Environment:
-	def __init__(self):
-		import sys
-		self.file = os.path.join(sys.path[0], '.env')
-		if not self.file_exists():
-			self.create_file()
+    def __init__(self):
+        import sys
+        self.file = os.path.join(sys.path[0], '.env')
+        if not self.file_exists():
+            self.create_file()
 
-	def file_exists(self):		
-		return os.path.exists(self.file)
+    def file_exists(self):
+        return os.path.exists(self.file)
 
-	def create_file(self):
-		open(self.file, 'w').close()
+    def create_file(self):
+        open(self.file, 'w').close()
 
-	def line_key(self, line):
-		return line.split('=')[0].strip()
+    def line_key(self, line):
+        return line.split('=')[0].strip()
 
-	def line_value(self, line):
-		return line.split('=')[-1].strip()
+    def line_value(self, line):
+        return line.split('=')[-1].strip()
 
-	def get(self, *args):
-		if not args:
-			return None
-		result = [None for x in range(0, len(args))]
-		with open(self.file, 'r+') as fp:
-			for line in fp:
-				for i, arg in enumerate(args,0):
-					if arg in line:
-						key = self.line_key(line)
-						if key == arg:
-							result[i] = self.line_value(line)
-		
-		return result[0] if len(args)==1 else result
+    def get(self, *args):
+        if not args:
+            return None
+        result = [None for x in range(0, len(args))]
+        with open(self.file, 'r+') as fp:
+            for line in fp:
+                for i, arg in enumerate(args, 0):
+                    if arg in line:
+                        key = self.line_key(line)
+                        if key == arg:
+                            result[i] = self.line_value(line)
 
-	def set(self, key, value):
+        return result[0] if len(args) == 1 else result
 
-		with open(self.file, 'r') as fp:
-			all_lines = fp.readlines()
+    def set(self, key, value):
 
-		found = False
-		with open(self.file, 'w') as fp:
-			for line in all_lines:
-				if '=' in line:
-					if self.line_key(line)==key:
-						fp.writelines(f'{key} = {value}\n')
-						found = True
-					else:
-						fp.writelines(line)
+        with open(self.file, 'r') as fp:
+            all_lines = fp.readlines()
 
-			if not found:
-				fp.writelines(f'{key} = {value}\n')
+        found = False
+        with open(self.file, 'w') as fp:
+            for line in all_lines:
+                if '=' in line:
+                    if self.line_key(line) == key:
+                        fp.writelines(f'{key} = {value}\n')
+                        found = True
+                    else:
+                        fp.writelines(line)
 
-	def remove(self, *keys):
+            if not found:
+                fp.writelines(f'{key} = {value}\n')
 
-		with open(self.file, 'r') as fp:
-			all_lines = fp.readlines()
+    def remove(self, *keys):
 
-		with open(self.file, 'w+') as fp:
-			for line in all_lines:					
-				if not self.line_key(line) in keys:
-					fp.writelines(line)
+        with open(self.file, 'r') as fp:
+            all_lines = fp.readlines()
 
-	def removeAll(self):
-		open(self.file, 'w+').close()
+        with open(self.file, 'w+') as fp:
+            for line in all_lines:
+                if not self.line_key(line) in keys:
+                    fp.writelines(line)
 
-
+    def removeAll(self):
+        open(self.file, 'w+').close()
