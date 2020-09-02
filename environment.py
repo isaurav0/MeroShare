@@ -51,6 +51,7 @@ class Environment:
 
             if not found:
                 fp.writelines(f'{key} = {value}\n')
+        return self
 
     def remove(self, *keys):
 
@@ -61,6 +62,8 @@ class Environment:
             for line in all_lines:
                 if not self.line_key(line) in keys:
                     fp.writelines(line)
+        return self
 
     def removeAll(self):
         open(self.file, 'w+').close()
+        return self

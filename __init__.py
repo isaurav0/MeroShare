@@ -1,2 +1,2 @@
-from meroshare import MeroShare
-from environment import Environment
+from meroshare.meroshare import MeroShare
+from meroshare.environment import Environment
