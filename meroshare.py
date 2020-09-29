@@ -3,7 +3,7 @@ import json
 import logging
 import requests
 from getpass import getpass
-from meroshare.environment import Environment
+from environment import Environment
 from prettytable import PrettyTable
 
 class MeroShare:
@@ -172,7 +172,7 @@ class MeroShare:
 
     def printIssues(self):
         if not self.issues:
-            self.logger.warning("No Issues. Login again and use getCurrentIssues() first.")
+            self.logger.warning("FetchError: Login again and use getCurrentIssues() first.")
             return
         result = '-----------------------------------------------------\n'
         for issue in self.issues:
@@ -180,7 +180,7 @@ class MeroShare:
             result += f'Sub Group: {issue["subGroup"]}\n'
             result += f'Share Group Name: {issue["shareGroupName"]}\n'            
             result += f'Share Type: {issue["shareTypeName"]}\n'
-            result += f'Reservation Type: {issue["reservationTypeName"]}\n'
+            # result += f'Reservation Type: {issue["reservationTypeName"]}\n'
             result += f'Scrip: {issue["scrip"]}\n'
             result += f'CompanyShareId (cid): {issue["companyShareId"]}\n'
             result += '-----------------------------------------------------\n'
@@ -259,7 +259,7 @@ class MeroShare:
         result += f'Minimum Quantity: {self.company_detail["minUnit"]}\n'
         result += f'Maximum Quantity: {self.company_detail["maxUnit"]}\n'
         result += f'Sub Group: {self.company_detail["subGroup"]}\n'
-        result += f'Share Group Name: {self.company_detail["shareGroupName"]}\n'            
+        result += f'Share Group Name: {self.company_detail["shareGroupName"]}\n'
         result += f'Share Type: {self.company_detail["shareTypeName"]}\n'
         result += f'Scrip: {self.company_detail["scrip"]}\n'
         result += f'CompanyShareId (cid): {self.company_detail["companyShareId"]}\n'
