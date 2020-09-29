@@ -3,7 +3,6 @@ import json
 import logging
 import requests
 from getpass import getpass
-# from meroshare.environment import Environment
 from environment import Environment
 from prettytable import PrettyTable
 
