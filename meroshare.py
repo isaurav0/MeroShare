@@ -4,8 +4,8 @@ import logging
 import requests
 import datetime
 from getpass import getpass
-# from meroshare.environment import Environment
-from environment import Environment
+from meroshare.environment import Environment
+# from environment import Environment
 from prettytable import PrettyTable
 
 class MeroShare:
