@@ -9,26 +9,30 @@ help_message='''
     Usage: meroshare [option] [optional_options]
 
     Viewing banks
-        -> meroshare banks
+        $ meroshare banks
 
     Logging in
-        -> meroshare login
+        $ meroshare login
 
         requires username, password and bank_id or bank_name
         bank details can be found from [banks] switch
 
     Viewing current issues
-        -> meroshare current_issues
-
-    Viewing submitted applications
-        -> meroshare reports
+        $ meroshare issues
 
     Viewing company details
-        -> meroshare company [company_id]
+        $ meroshare company [company_id]
         [company_id] can be found from issues and reports
 
+    Viewing submitted applications
+        $ meroshare reports
+
+    Viewing result of applied share
+        $ meroshare result [form_id]
+        [form_id] can be found from [reports] switch
+
     Logging out
-        -> meroshare logout
+        $ meroshare logout
 
 '''
 
@@ -50,7 +54,7 @@ def main():
     if option == 'login':
         pass
 
-    elif option == 'current_issues':
+    elif option == 'issues':
         share.getCurrentIssues().printIssues()
 
     elif option == 'reports':
@@ -58,6 +62,7 @@ def main():
 
     elif option == 'company':
         if len(sys.argv) < 3:
+            print("Error: Company Id not supplied! ")
             print(help_message)
             exit()
 
@@ -67,6 +72,15 @@ def main():
     elif option == 'logout':
         share.eraseCredentials()
         print('Logged Out.')
+
+    elif option == 'result':
+        if len(sys.argv) < 3:
+            print("Error: Form Id not supplied! ")
+            print(help_message)
+            exit()
+
+        fid = sys.argv[2]
+        share.getFormDetails(fid).printFormDetails()
 
     else:
         print(help_message)

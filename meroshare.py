@@ -2,9 +2,10 @@ import sys
 import json
 import logging
 import requests
+import datetime
 from getpass import getpass
-from meroshare.environment import Environment
-# from environment import Environment
+# from meroshare.environment import Environment
+from environment import Environment
 from prettytable import PrettyTable
 
 class MeroShare:
@@ -14,6 +15,7 @@ class MeroShare:
         self.issues = []
         self.application_report = None
         self.company_detail = None
+        self.form_detail = None
         self.__auth_url__ = 'https://backend.cdsc.com.np/api/meroShare/auth/'
         self.__issue_url__ = 'https://backend.cdsc.com.np/api/meroShare/'\
                              'companyShare/active/search/'
@@ -26,6 +28,9 @@ class MeroShare:
                              'meroShare/capital/'
         self.__company_share_details_url__ = 'https://backend.cdsc.com.np'\
                                              '/api/meroShare/active/{cid}'
+
+        self.__form_result_url__ = 'https://backend.cdsc.com.np/api/mero'\
+                                   'Share/applicantForm/report/detail/{fid}'
         self.__headers__ = {
             'Accept': 'application/json, text/plain, */*',
             'Accept-Encoding': 'gzip, deflate, br',
@@ -48,13 +53,16 @@ class MeroShare:
         if defaultLogin:
             self.loginUser()
 
+    def pretty_date(self, date):
+        return datetime.datetime.strptime(date.split('T')[0],"%Y-%M-%d").strftime("%b %d %Y")
+
     def __getAuthHeaders__(self, content_length):
         auth = self.__env__.get('AUTH')
         if not auth:
             raise Exception('User Not Authorized')
         auth_headers = {
             'Authorization': auth,
-            'Content-Length': str(content_length),            
+            'Content-Length': str(content_length),
         }
         return {**self.__headers__, **auth_headers}
 
@@ -168,24 +176,25 @@ class MeroShare:
             self.issues = json_response['object']
             return self
         self.__env__.remove('AUTH')
-        self.logger.info('Invalid session. Start again.')
+        raise Exception('Invalid session: Looks like you logged in from another device.\n Use the same command again.')
         return self
 
     def printIssues(self):
         if not self.issues:
             self.logger.warning("FetchError: Login again and use getCurrentIssues() first.")
             return
-        result = '-----------------------------------------------------\n'
+
+        issues_table = PrettyTable()
+        issues_table.field_names = ['CID', 'Company Name', 'Sub Group',
+                                    'Share Type', 'Share Group', 'Scrip']
         for issue in self.issues:
-            result += f'Company Name: {issue["companyName"]}\n'
-            result += f'Sub Group: {issue["subGroup"]}\n'
-            result += f'Share Group Name: {issue["shareGroupName"]}\n'            
-            result += f'Share Type: {issue["shareTypeName"]}\n'
-            # result += f'Reservation Type: {issue["reservationTypeName"]}\n'
-            result += f'Scrip: {issue["scrip"]}\n'
-            result += f'CompanyShareId (cid): {issue["companyShareId"]}\n'
-            result += '-----------------------------------------------------\n'
-        print(result)
+            issues_table.add_row([issue['companyShareId'],
+                                  issue['companyName'],
+                                  issue['subGroup'],
+                                  issue['shareTypeName'],
+                                  issue['shareGroupName'],
+                                  issue['scrip']])
+        print(issues_table)
 
     def getApplicationReport(self):
         payload = {"filterFieldParams":[
@@ -211,22 +220,24 @@ class MeroShare:
             self.application_report = json_response['object']
             return self
         self.__env__.remove('AUTH')
-        self.logger.info('Invalid session. Start again.')
+        raise Exception('Invalid session: Looks like you logged in from another device.\n Use the same command again.')
         return self
 
     def printApplicationReport(self):
         if not self.application_report:
-            raise Exception("FetchError: Application Reports not fetched.")
+            print("FetchError: Application Reports not fetched.")
             return
         report_table = PrettyTable()
-        report_table.field_names = ['CID', 'Company Name', 'Sub Group',
-                                    'Share Type', 'Share Group']
+        report_table.field_names = ['CID', 'FID', 'Company Name', 'Sub Group',
+                                    'Share Type', 'Share Group', 'Scrip']
         for report in self.application_report:
             report_table.add_row([report['companyShareId'],
+                                  report['applicantFormId'],
                                   report['companyName'],
                                   report['subGroup'],
                                   report['shareTypeName'],
-                                  report['shareGroupName']])
+                                  report['shareGroupName'],
+                                  report['scrip']])
         print(report_table)
         return
 
@@ -243,18 +254,18 @@ class MeroShare:
             return self
         print(res.text)
         self.__env__.remove('AUTH')
-        self.logger.info('Invalid session. Start again.')
+        raise Exception('Invalid session: Looks like you logged in from another device.\n Use the same command again.')
         return self
 
     def printCompanyDetails(self):
         if not self.company_detail:
-            raise Exception("FetchError: Company Details not fetched. ")
+            print("FetchError: Company Details not fetched. ")
 
         result = '-------------------------------------------------------\n'
         result += f'Company Name: {self.company_detail["companyName"]}\n'
         result += f'Issue Manager: {self.company_detail["clientName"]}\n'
-        result += f'Issue Open Date: {self.company_detail["minIssueOpenDate"]}\n'
-        result += f'Issue Close Date: {self.company_detail["maxIssueCloseDate"]}\n'
+        result += f'Issue Open Date: {self.pretty_date(self.company_detail["minIssueOpenDate"])}\n'
+        result += f'Issue Close Date: {self.pretty_date(self.company_detail["maxIssueCloseDate"])}\n'
         result += f'No. Of Share Issued: {self.company_detail["shareValue"]}\n'
         result += f'Price Per Share: {self.company_detail["sharePerUnit"]}\n'
         result += f'Minimum Quantity: {self.company_detail["minUnit"]}\n'
@@ -267,3 +278,37 @@ class MeroShare:
         result += '-----------------------------------------------------\n'
         print(result)
         return
+
+    def getFormDetails(self, fid):
+
+        res = requests.get(
+            self.__form_result_url__.format(fid=str(fid)),
+            headers={**self.__headers__,
+                     'Authorization': self.__env__.get('AUTH')
+                     }
+        )
+
+        if res.status_code == 200:
+            json_response = json.loads(res.text)
+            self.form_detail = json_response
+            return self
+        self.__env__.remove('AUTH')
+        raise Exception('Invalid session: Looks like you logged in from another device.\n Use the same command again.')
+
+    def printFormDetails(self):
+        if not self.form_detail:
+            print("Form details not available.")
+            return self
+
+        result = '-------------------------------------------------------\n'
+        result += f'Applied Quantity: {self.form_detail["appliedKitta"]}\n'
+        result += f'Applied Amount: {self.form_detail["amount"]}\n'
+        result += f'Bank: {self.form_detail["registeredBranchName"]}\n'
+        result += f'Account Number: {self.form_detail["accountNumber"]}\n'
+        result += f'Application Submitted Date: {self.pretty_date(self.form_detail["appliedDate"])}\n'
+        result += f'Status: {self.form_detail["statusName"]}\n'
+        result += f'Alloted Amount: {self.form_detail["receivedKitta"]}\n'
+        result += f'Remarks: {self.form_detail["meroshareRemark"]}\n'
+        result += '-----------------------------------------------------\n'
+        print(result)
+        return self
