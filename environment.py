@@ -4,7 +4,7 @@ import os
 class Environment:
     def __init__(self):
         import sys
-        self.file = os.path.join(sys.path[0], '.env')
+        self.file = os.path.join('.env')
         if not self.file_exists():
             self.create_file()
 
