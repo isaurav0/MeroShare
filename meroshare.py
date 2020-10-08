@@ -307,7 +307,10 @@ class MeroShare:
         result += f'Account Number: {self.form_detail["accountNumber"]}\n'
         result += f'Application Submitted Date: {self.pretty_date(self.form_detail["appliedDate"])}\n'
         result += f'Status: {self.form_detail["statusName"]}\n'
-        result += f'Alloted Amount: {self.form_detail["receivedKitta"]}\n'
+        try:
+            result += f'Alloted Amount: {self.form_detail["receivedKitta"]}\n'
+        except:
+            pass
         result += f'Remarks: {self.form_detail["meroshareRemark"]}\n'
         result += '-----------------------------------------------------\n'
         print(result)
