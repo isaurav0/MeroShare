@@ -64,7 +64,7 @@ You obtain `bank_id` and `bank_name` from the above command and any one of these
 ```
 
 
-##### Listing IPO's and new issues  
+##### Listing IPOs and new issues  
 
 Use `getCurrentIssues()` to make request to site and obtain json which is stored in `issues` attribute.
 ```python
@@ -77,22 +77,30 @@ Use `getCurrentIssues()` to make request to site and obtain json which is stored
 
 ##### List of all submitted applications  
 
-Method:  `getApplicationReport()` 
-Attribute: `application_report`
-Pretty Print: `printApplicationReport()`
+**Method:**  `getApplicationReport()` 
+
+**Attribute:** `application_report` 
+
+**Pretty Print:** `printApplicationReport()` 
 
 
 ##### Details of company listed  
-Method: `getCompanyDetails(cid)`
-Attibute: `company_detail`
-Pretty Print: `printCompanyDetails()`
+**Method:** `getCompanyDetails(cid)` 
+
+**Attribute:** `company_detail` 
+
+**Pretty Print:** `printCompanyDetails()` 
+
 `cid` is company_id and can be obtained from `application_report` and `issues`.
 
 
 ##### Result of submitted application form
-Method: `getFormDetails(fid)`
-Attribute: `form_detail`
-Pretty Print: `printFormDetails()`
+**Method:** `getFormDetails(fid)` 
+
+**Attribute:** `form_detail` 
+
+**Pretty Print:** `printFormDetails()` 
+
 `fid` is form_id and can be obtained from `application_report`
 
 ### Command Line
