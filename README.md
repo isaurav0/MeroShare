@@ -45,7 +45,7 @@ This example downloads all shares listed on the website in json format and prett
 
 I have implemented [Fluent Interface](https://en.wikipedia.org/wiki/Fluent_interface) API design pattern so it can be intuitive to use. You might have already noticed that we use method chaining to collect data from website and accumulate the value in an attribute and then use the corresponding attribute.
 
-##### Getting banks
+#### Getting banks
 To login to website, you need to select your bank. Bank details can be obtained as using `getBanks()` method. If you want json data, you can use `banks` attribute. If you want properly formatted results, use `printBanks()`. 
 ```python
 >>> from meroshare import MeroShare
@@ -57,14 +57,14 @@ To login to website, you need to select your bank. Bank details can be obtained 
 ```
 You obtain `bank_id` and `bank_name` from the above command and any one of these in addition to your username and password, can be used to login to site.
 
-##### Logging in
+#### Logging in
 `login()` method can be used to login. It will prompt for username, password and bank details. 
 ```
 >>> share.login()
 ```
 
 
-##### Listing IPOs and new issues  
+#### Listing IPOs and new issues  
 
 Use `getCurrentIssues()` to make request to site and obtain json which is stored in `issues` attribute.
 ```python
@@ -75,30 +75,24 @@ Use `getCurrentIssues()` to make request to site and obtain json which is stored
 ```
 
 
-##### List of all submitted applications  
+#### List of all submitted applications  
 
 **Method:**  `getApplicationReport()` 
-
 **Attribute:** `application_report` 
-
 **Pretty Print:** `printApplicationReport()` 
 
 
-##### Details of company listed  
+#### Details of company listed  
 **Method:** `getCompanyDetails(cid)` 
-
 **Attribute:** `company_detail` 
-
 **Pretty Print:** `printCompanyDetails()` 
 
 `cid` is company_id and can be obtained from `application_report` and `issues`.
 
 
-##### Result of submitted application form
+#### Result of submitted application form
 **Method:** `getFormDetails(fid)` 
-
 **Attribute:** `form_detail` 
-
 **Pretty Print:** `printFormDetails()` 
 
 `fid` is form_id and can be obtained from `application_report`
