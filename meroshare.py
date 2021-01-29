@@ -17,12 +17,16 @@ class MeroShare:
         self.company_detail = None
         self.form_detail = None
         self.__auth_url__ = 'https://backend.cdsc.com.np/api/meroShare/auth/'
-        self.__issue_url__ = 'https://backend.cdsc.com.np/api/meroShare/'\
-                             'companyShare/active/search/'
+        self.__current_issue_url__ = 'https://backend.cdsc.com.np/api/me'\
+                             'roShare/companyShare/currentIssue'
 
         self.__application_report_url__ = 'https://backend.cdsc.com.np/api'\
                                           '/meroShare/applicantForm/active'\
                                           '/search/'
+
+        self.__old_application_report_url__ = 'https://backend.cdsc.com.np'\
+                                              '/api/meroShare/migrated/app'\
+                                              'licantForm/search/'
 
         self.__banks_url__ = 'https://backend.cdsc.com.np/api/'\
                              'meroShare/capital/'
@@ -45,7 +49,9 @@ class MeroShare:
             'Content-Type': 'application/json',
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac'
                           ' OS X 10_15_6) AppleWebKit/537.36 (KHTML'
-                          ', like Gecko) Chrome/85.0.4183.83 Safari/537.36'
+                          ', like Gecko) Chrome/85.0.4183.83 Safari/537.36',
+            'Pragma': 'no-cache',
+            'Cache-Control': 'no-cache'
         }
         self.__env__ = Environment()
         self.logger = logging.getLogger()
@@ -154,29 +160,29 @@ class MeroShare:
 
     def getCurrentIssues(self):
         payload = {"filterFieldParams": [
-                        {"key": "companyIssue.companyISIN.script","alias":"Scrip"},
-                        {"key": "companyIssue.companyISIN.company.name","alias":"Company Name"},
-                        {"key": "companyIssue.assignedToClient.name","value":"","alias":"Issue Manager"}
+                        {"key": "companyIssue.companyISIN.script", "alias":"Scrip"},
+                        {"key": "companyIssue.companyISIN.company.name", "alias": "Company Name"},
+                        {"key": "companyIssue.assignedToClient.name", "value":"", "alias": "Issue Manager"}
                     ],
                     "page":1,
                     "size":200,
                     "searchRoleViewConstants":"VIEW_OPEN_SHARE",
                     "filterDateParams":[
-                        {"key":"minIssueOpenDate","condition":"","alias":"","value":""},
-                        {"key":"maxIssueCloseDate","condition":"","alias":"","value":""}
+                        {"key": "minIssueOpenDate", "condition": "", "alias": "", "value": ""},
+                        {"key": "maxIssueCloseDate", "condition": "", "alias":"", "value": ""}
                     ]
                    }
         res = requests.post(
-            self.__issue_url__,
+            self.__current_issue_url__,
             headers=self.__getAuthHeaders__(446),
             data=json.dumps(payload)
         )
-        if res.status_code == 200:
+        if res.status_code:
             json_response = json.loads(res.text)
             self.issues = json_response['object']
             return self
         self.__env__.remove('AUTH')
-        raise Exception('Invalid session: Looks like you logged in from another device.\n Use the same command again.')
+        raise Exception('Invalid session.\n Use the same command again.')
         return self
 
     def printIssues(self):
@@ -213,6 +219,33 @@ class MeroShare:
         res = requests.post(
             self.__application_report_url__,
             headers=self.__getAuthHeaders__(746),
+            data=json.dumps(payload)
+        )
+        if res.status_code == 200:
+            json_response = json.loads(res.text)
+            self.application_report = json_response['object']
+            return self
+        self.__env__.remove('AUTH')
+        raise Exception('Invalid session: Looks like you logged in from another device.\n Use the same command again.')
+        return self
+
+    def getOldApplicationReport(self):
+        payload = {"filterFieldParams":[
+                        {"key":"companyShare.companyIssue.companyISIN.script","alias":"Scrip"},
+                        {"key":"companyShare.companyIssue.companyISIN.company.name","alias":"Company Name"}
+                    ],
+                    "page":1,
+                    "size":200,
+                    "searchRoleViewConstants":"VIEW_APPLICANT_FORM_COMPLETE",
+                    "filterDateParams":[
+                        {"key":"appliedDate","condition":"","alias":"","value":""},
+                        {"key":"appliedDate","condition":"","alias":"","value":""}
+                    ]
+                }
+
+        res = requests.post(
+            self.__old_application_report_url__,
+            headers=self.__getAuthHeaders__(370),
             data=json.dumps(payload)
         )
         if res.status_code == 200:

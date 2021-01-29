@@ -2,37 +2,51 @@
 import sys
 from meroshare import MeroShare
 
-help_message='''
+LOGIN = 'login'
+BANKS = 'banks'
+ISSUES = 'issues'
+COMPANY = 'company'
+REPORTS = 'reports'
+ALL_REPORTS = 'all_reports'
+RESULT = 'result'
+LOGOUT = 'logout'
+
+help_message=f'''
 
     A command line tool to get meroshare details
 
     Usage: meroshare [option] [optional_options]
 
     Viewing banks
-        $ meroshare banks
+        $ meroshare {BANKS}
 
     Logging in
-        $ meroshare login
+        $ meroshare {LOGIN}
 
         requires username, password and bank_id or bank_name
-        bank details can be found from [banks] switch
+        bank details can be found from
+            $ meroshare {BANKS}
+        command.
 
     Viewing current issues
-        $ meroshare issues
+        $ meroshare {ISSUES}
 
     Viewing company details
-        $ meroshare company [company_id]
+        $ meroshare {COMPANY} [company_id]
         [company_id] can be found from issues and reports
 
-    Viewing submitted applications
-        $ meroshare reports
+    Viewing recent submitted applications
+        $ meroshare {REPORTS}
+
+    Viewing all submitted applications
+        $ meroshare {ALL_REPORTS}
 
     Viewing result of applied share
-        $ meroshare result [form_id]
+        $ meroshare {RESULT} [form_id]
         [form_id] can be found from [reports] switch
 
     Logging out
-        $ meroshare logout
+        $ meroshare {LOGOUT}
 
 '''
 
@@ -44,23 +58,26 @@ def main():
 
     option = sys.argv[1]
 
-    if option == 'banks':
+    if option == BANKS:
         share = MeroShare(defaultLogin=False)
         share.getBanks().printBanks()
         return
 
     share = MeroShare(defaultLogin=True)
 
-    if option == 'login':
+    if option == LOGIN:
         pass
 
-    elif option == 'issues':
+    elif option == ISSUES:
         share.getCurrentIssues().printIssues()
 
-    elif option == 'reports':
+    elif option == REPORTS:
         share.getApplicationReport().printApplicationReport()
 
-    elif option == 'company':
+    elif option == ALL_REPORTS:
+        share.getOldApplicationReport().printApplicationReport()
+
+    elif option == COMPANY:
         if len(sys.argv) < 3:
             print("Error: Company Id not supplied! ")
             print(help_message)
@@ -69,11 +86,11 @@ def main():
         cid = sys.argv[2]
         share.getCompanyDetails(cid).printCompanyDetails()
 
-    elif option == 'logout':
+    elif option == LOGOUT:
         share.eraseCredentials()
         print('Logged Out.')
 
-    elif option == 'result':
+    elif option == RESULT:
         if len(sys.argv) < 3:
             print("Error: Form Id not supplied! ")
             print(help_message)
@@ -85,6 +102,7 @@ def main():
     else:
         print(help_message)
         exit()
+
 
 if __name__ == '__main__':
     main()
